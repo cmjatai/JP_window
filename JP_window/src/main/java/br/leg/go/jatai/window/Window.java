@@ -10,7 +10,7 @@ public class Window extends JFrame implements ActionListener {
     
     Window(){
         
-      this.setTitle("Cadastro de Clientes");
+      this.setTitle("Cadastro de clientes");
     this.setSize(400,200);
     this.setLocationRelativeTo(null);
     this.setDefaultCloseOperation(EXIT_ON_CLOSE);
