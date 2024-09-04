@@ -3,6 +3,7 @@ package br.leg.go.jatai.window;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,105 +23,106 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class Window extends JFrame implements ActionListener {
-    
-    private JPanel pnDados, pnBotoes;
-    private JLabel lbUsuario, lbSenha, lbUrl; 
+
+    private JPanel pnDados, pnUrl, pnTexto;
+    private JLabel lbUsuario, lbSenha, lbUrl;
     private JTextField tfUsuario, tfUrl;
     private JPasswordField pfSenha;
-    private JButton btLogin, btVerSenha;
+    private JButton btLogin, btVerSenha, btGet;
     private JTextArea taResposta;
-    private Container tela;     
-    
-    
-    
-    Window() {
-        
-     
+    private Container tela;
 
+    Window() {
         tela = this.getContentPane();
         tela.setLayout(new BorderLayout());
-        
+
+        JPanel pnAuxiliar = new JPanel();
+        pnAuxiliar.setLayout(new GridLayout(2, 1));
+
         pnDados = new JPanel();
-        pnBotoes = new JPanel();
-        
-        tela.add(pnDados, BorderLayout.CENTER);
-        tela.add(pnBotoes, BorderLayout.SOUTH);
-        
+        pnUrl = new JPanel();
+        pnTexto = new JPanel();
+
+        pnDados.setPreferredSize(new Dimension(800, 130));
+        pnUrl.setPreferredSize(new Dimension(800, 130));
+        pnTexto.setPreferredSize(new Dimension(800, 340));
+
+        pnAuxiliar.add(pnDados);
+        pnAuxiliar.add(pnUrl);
+
+        tela.add(pnAuxiliar, BorderLayout.NORTH);
+        tela.add(pnTexto, BorderLayout.CENTER);
+
         pnDados.setBackground(new Color(23, 118, 242));
-        pnBotoes.setBackground(Color.LIGHT_GRAY);
-        
-        lbUsuario = new JLabel("                                       Usuário:");
-        lbSenha = new JLabel("                                        Senha:");
-        lbUrl = new JLabel("                                         URL:");
-        tfUsuario = new JTextField(10);
+        pnUrl.setBackground(new Color(10, 233, 116));
+        pnTexto.setBackground(Color.GRAY);
+
+        lbUsuario = new JLabel("Usuário:");
+        lbSenha = new JLabel("Senha:");
+        lbUrl = new JLabel("URL:");
+        tfUsuario = new JTextField(40);
         pfSenha = new JPasswordField(30);
         tfUrl = new JTextField(20);
-        taResposta = new JTextArea(5, 30);
+        taResposta = new JTextArea(5, 20);
         taResposta.setEditable(false);
-        
-        btLogin = new JButton("LOGIN");
+
+        btLogin = new JButton("Login");
         btVerSenha = new JButton("Ver senha");
-        
-        pnDados.setLayout(new GridLayout(4, 2));
-        
+        btGet = new JButton("GET");
+
+        pnDados.setLayout(new GridLayout(1, 5));
+        pnUrl.setLayout(new GridLayout(1, 3));
+
         pnDados.add(lbUsuario);
         pnDados.add(tfUsuario);
         pnDados.add(lbSenha);
         pnDados.add(pfSenha);
-        pnDados.add(lbUrl);
-        pnDados.add(tfUrl);
-        pnDados.add(new JLabel("                                        Resposta:"));
-        pnDados.add(taResposta);
-       
-        pnBotoes.setLayout(new GridLayout(1, 2));
-        pnBotoes.add(btLogin);
-        pnBotoes.add(btVerSenha);
-    
-       btVerSenha.addActionListener(this);
+        pnDados.add(btLogin);
+
+        pnUrl.add(lbUrl);
+        pnUrl.add(tfUrl);
+        pnUrl.add(btGet);
+
+        pnTexto.setLayout(new BorderLayout());
+        pnTexto.add(taResposta, BorderLayout.CENTER);
+
+        btVerSenha.addActionListener(this);
         btLogin.addActionListener(this);
-        
-        tfUrl.setEditable(false);
+        btGet.addActionListener(this);
+
+        tfUrl.setEditable(true);
         tfUrl.setText("https://www.jatai.go.leg.br/api/auth/token");
-        
-        this.setTitle("Cadastro de clientes");
-        this.setSize(700, 350);
+
+        this.setTitle("Cadastro de Clientes");
+        this.setSize(800, 600);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        this.setVisible(true); 
+        this.setVisible(true);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-     
-        int k=2;
-        
-         
-        
+
         if (e.getSource() == btLogin) {
             String usuario = tfUsuario.getText();
             String senha = new String(pfSenha.getPassword());
             String urlString = tfUrl.getText();
-            
+
             try {
-                // Cria a URL e abre a conexão
                 URL url = new URL(urlString);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                
-                // Configura a conexão para POST
+
                 connection.setRequestMethod("POST");
                 connection.setDoOutput(true);
-               connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-                // Cria a string de parâmetros
                 String params = "username=" + usuario + "&password=" + senha;
 
-                // Envia os parâmetros
                 OutputStream os = connection.getOutputStream();
                 os.write(params.getBytes(StandardCharsets.UTF_8));
                 os.flush();
                 os.close();
 
-                // Lê a resposta
                 BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String inputLine;
                 StringBuilder response = new StringBuilder();
@@ -128,21 +130,16 @@ public class Window extends JFrame implements ActionListener {
                     response.append(inputLine);
                 }
                 in.close();
-                
+
                 taResposta.setText(response.toString());
 
-          
-
-                // Verifica se a resposta é HTTP OK
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     JOptionPane.showMessageDialog(this, "Login realizado com sucesso!");
-                   
                 } else {
                     JOptionPane.showMessageDialog(this, "Erro no login: " + responseCode);
                 }
 
-                // Fecha a conexão
                 connection.disconnect();
 
             } catch (Exception ex) {
@@ -150,15 +147,42 @@ public class Window extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Erro ao tentar se conectar: " + ex.getMessage());
             }
 
-            // Limpa os campos de usuário e senha
             tfUsuario.setText("");
             pfSenha.setText("");
         }
-        
-        if(e.getSource() == btVerSenha){
-         
-            pfSenha.setEchoChar(Character.MIN_VALUE);
-          
+
+        if (e.getSource() == btGet) {
+            try {
+
+                URL url2 = new URL(tfUrl.getText());
+                HttpURLConnection con = (HttpURLConnection) url2.openConnection();
+
+                con.setRequestMethod("GET");
+
+                int responseCode = con.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+
+                    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    String inputLine;
+                    StringBuilder response = new StringBuilder();
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+
+                    JOptionPane.showMessageDialog(this, "Requisição GET realizada com sucesso!");
+                    taResposta.setText(response.toString());
+                } else {
+                    JOptionPane.showMessageDialog(this, "Erro na requisição GET: " + responseCode);
+                }
+
+                con.disconnect();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Erro ao tentar se conectar: " + ex.getMessage());
+            }
+        }
+
     }
-    }
+
 }
