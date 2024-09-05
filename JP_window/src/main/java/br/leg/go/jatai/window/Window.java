@@ -104,31 +104,55 @@ public class Window extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
 
         if (e.getSource() == btLogin) {
+            
+            //limpa a JTextArea para mostrar um novo Token
+            
+            taResposta.setText("");
+            
+            
+           
             String usuario = tfUsuario.getText();
             String senha = new String(pfSenha.getPassword());
             String urlString = tfUrl.getText();
 
             try {
+                //instancia uma URL e abre uma conexão para POST 
+                
+                
                 URL url = new URL(urlString);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
                 connection.setRequestMethod("POST");
+                
+                //Tenta firmar uma conexão com a URL criada e define também a saída de dados da conexão
                 connection.setDoOutput(true);
+                
+                //tipo de conteúdo
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
+                
                 String params = "username=" + usuario + "&password=" + senha;
 
+                //Obter o fluxo de saída da conexão
                 OutputStream os = connection.getOutputStream();
+                
+                //Escreve a String params no corpo da requisição HTTP
                 os.write(params.getBytes(StandardCharsets.UTF_8));
+                
+                //fecha o OutputStream (fluxo)
                 os.flush();
                 os.close();
-
+       
+                    
+                //lê a resposta da conexão e armazena numa String mutável (StringBuilder)
                 BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String inputLine;
                 StringBuilder response = new StringBuilder();
+                
                 while ((inputLine = in.readLine()) != null) {
                     response.append(inputLine);
                 }
+                
+                //fecha o leitor
                 in.close();
 
                 taResposta.setText(response.toString());
@@ -173,6 +197,7 @@ public class Window extends JFrame implements ActionListener {
                     JOptionPane.showMessageDialog(this, "Requisição GET realizada com sucesso!");
                     taResposta.setText(response.toString());
                 } else {
+                    
                     JOptionPane.showMessageDialog(this, "Erro na requisição GET: " + responseCode);
                 }
 
@@ -180,9 +205,12 @@ public class Window extends JFrame implements ActionListener {
             } catch (Exception ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(this, "Erro ao tentar se conectar: " + ex.getMessage());
+               
             }
         }
 
     }
+    
+    
 
 }
